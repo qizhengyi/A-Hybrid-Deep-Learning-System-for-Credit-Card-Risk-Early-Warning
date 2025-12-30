@@ -1,60 +1,111 @@
-# CardGuard
-### A Hybrid Deep Learning System for Credit Card Risk Early Warning
+# Credit Risk Early Warning System  
+**SQL Feature Store · PyTorch Models · Backtesting & Monitoring**
 
-## Overview
-CardGuard is an end-to-end machine learning project for credit card risk early warning.
-It predicts customer default risk by combining:
-- Traditional statistical models
-- Tree-based models
-- Transformer-based deep learning models (PyTorch)
-
-The project is designed to simulate real-world financial risk modeling pipelines used in banks and fintech companies.
+This repository implements an end-to-end **credit risk early warning pipeline**, covering data ingestion, SQL-based feature engineering, model training, backtesting, and risk reporting.  
+The project is designed to resemble a **production-style credit risk workflow** commonly used in financial institutions.
 
 ---
 
-## Key Features
-- SQL-style data extraction and preprocessing
-- Feature engineering for credit risk modeling
-- Baseline models:
-  - Logistic Regression
-  - Decision Tree
-- Deep learning model:
-  - Transformer for sequential transaction data
-- Model comparison with financial risk metrics
-- Clean, modular, and reproducible codebase
+## 1. Problem Statement
+
+The goal of this project is to **predict the Probability of Default (PD)** for credit card customers using historical behavioral data, and to convert model outputs into **actionable risk tiers** for early intervention.
+
+Key objectives:
+- Generate reproducible and auditable features using SQL
+- Train multiple risk models, including deep learning models in PyTorch
+- Evaluate models using industry-standard risk metrics
+- Produce formal backtesting reports and monitoring artifacts
 
 ---
 
-## Tech Stack
-- **Python**
-- **PyTorch**
-- **scikit-learn**
-- **SQL (via pandas / SQLite simulation)**
-- **NumPy / Pandas / Matplotlib**
+## 2. Data Source
+
+- **Dataset**: *Default of Credit Card Clients (Taiwan)*
+- **Provider**: UCI Machine Learning Repository
+- **Sample Size**: 30,000 customers
+- **Target**: Default in the next billing cycle (binary)
+
+Raw data is **programmatically downloaded** and converted into CSV for reproducibility.  
+Raw files are excluded from version control.
 
 ---
 
-## Data
-Public credit card and financial datasets (e.g. UCI Credit Card Default Dataset).
-The pipeline supports extension to large-scale relational databases.
+## 3. Feature Engineering (SQL-Driven)
+
+All features are constructed using **SQL views** in DuckDB, simulating a production feature store.
+
+Feature categories include:
+- Credit utilization ratios
+- Repayment ratios
+- Delinquency frequency and severity
+- Trend-based bill and payment deltas
+- Six-month behavioral sequences for temporal modeling
+
+This design ensures:
+- Full auditability of feature definitions
+- Consistent features across training and scoring
+- Clear separation between data engineering and modeling
 
 ---
 
-## Modeling Pipeline
-1. Data ingestion (SQL-style queries)
-2. Data cleaning & feature engineering
-3. Baseline risk models (Logistic Regression, Decision Tree)
-4. Transformer-based sequential modeling (PyTorch)
-5. Model evaluation & comparison
+## 4. Models Implemented
+
+| Model | Description |
+|------|------------|
+| Logistic Regression | Interpretable baseline (scorecard-style) |
+| Decision Tree | Non-linear baseline |
+| PyTorch MLP | Neural network for tabular risk modeling |
+| PyTorch Transformer | Sequence model over 6 months of credit behavior |
+
+The **Transformer-based model** achieved the strongest overall ranking performance in backtesting.
 
 ---
 
-## Evaluation Metrics
-- AUC-ROC
+## 5. Backtesting Setup
+
+- **Train/Test Split**: 80% / 20%
+- The test set serves as an **out-of-time proxy**
+- Model performance is evaluated on the hold-out set
+
+### Evaluation Metrics
+- ROC-AUC
 - KS Statistic
-- Precision / Recall
-- Time-based validation
+- PR-AUC
+- Brier Score (calibration)
 
 ---
 
-## Project Structure
+## 6. Backtesting Results
+
+A formal backtesting report has been generated in PDF format:
+
+📄 **Backtesting Report**  
+`reports/Credit_Risk_Backtesting_Report.pdf`
+
+Summary results (Transformer model):
+
+| Metric | Value |
+|------|------|
+| ROC-AUC | ~0.77 |
+| KS | ~0.42 |
+| PR-AUC | ~0.45 |
+| Brier Score | ~0.16 |
+
+These results indicate strong discriminatory power and acceptable probability calibration.
+
+---
+
+## 7. Risk Tiering
+
+Predicted PDs are mapped into operational risk tiers:
+
+- **Green**: Low risk
+- **Amber**: Medium risk
+- **Red**: High risk
+
+Tier-level analysis shows **monotonic increases in default rates**, validating the effectiveness of the early warning framework.
+
+A structured tier-level backtesting summary is exported as:
+
+```text
+data/processed/risk_backtest_report.csv
